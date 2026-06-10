@@ -7,7 +7,7 @@ import axios from "axios";
  * both server (SSR prefetch) and client (React Query refetch) environments.
  */
 export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:9168",
+  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "https://localhost:9168",
   timeout: 10_000,
   headers: {
     "Content-Type": "application/json",

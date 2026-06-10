@@ -88,4 +88,24 @@ impl CertificateStore {
         .fetch_optional(&self.pool)
         .await
     }
+
+    pub async fn get_all_certificates(&self) -> Result<Vec<Certificate>, sqlx::Error> {
+        sqlx::query_as!(
+            Certificate,
+            r#"
+            SELECT
+                id as "id!",
+                serial_number,
+                subject as "subject!",
+                issuer as "issuer!",
+                not_after as "not_after!",
+                san_entries as "san_entries!",
+                created_at as "created_at!"
+            FROM certificates
+            ORDER BY created_at DESC
+            "#,
+        )
+        .fetch_all(&self.pool)
+        .await
+    }
 }
