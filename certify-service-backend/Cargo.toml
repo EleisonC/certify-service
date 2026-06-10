@@ -21,6 +21,9 @@ sqlx = { version = "0.8.6", default-features = false, features = [
     "uuid",
     "chrono",
 ] }
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.20", features = ["registry", "env-filter"] }
+tracing-error = "0.2.1"
 uuid = { version = "1.23.3", features = ["v4", "serde"] }
 tower-http = { version = "0.6.11", features = ["cors"] }
 axum-server = { version = "0.8.0", features = ["tls-rustls"] }

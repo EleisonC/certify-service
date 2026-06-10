@@ -161,6 +161,11 @@ Returns `200` with a list of all stored certificates.
 - **thiserror** — ergonomic application error types.
 - **dotenvy** — environment-based configuration loading.
 - **Reqwest** (dev-dependency) — HTTP client used by integration tests.
+- **tracing** — structured application logging for requests and certificate operations.
+- **tracing-subscriber** — configurable log filtering and formatting via environment variables.
+- **tracing-error** — improved error diagnostics with span-aware error reporting.
+- **tower-http** — HTTP middleware such as CORS for API access control.
+- **axum-server** + **rustls** — HTTPS server implementation using Rust-native TLS.
 
 ## Configuration
 
