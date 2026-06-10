@@ -1,11 +1,59 @@
 # certify-service-backend
 
-A small Rust HTTP service that accepts a PEM-encoded X.509 certificate, parses out
-its metadata, stores it in PostgreSQL, and serves it back by id.
+A Rust HTTPS service that accepts PEM-encoded X.509 certificates, extracts and stores certificate metadata in PostgreSQL, and exposes APIs to retrieve individual certificates by ID or list all stored certificates.
+
+The service uses TLS for encrypted communication and includes support for local development using a self-signed certificate.
 
 Built with [Axum](https://github.com/tokio-rs/axum), [SQLx](https://github.com/launchbadge/sqlx)
 (PostgreSQL, compile-time-checked queries), and
 [x509-parser](https://github.com/rusticata/x509-parser).
+
+## Prerequisites
+
+The service runs over HTTPS and expects TLS certificate files to be present under `certify-service-backend/certs/`.
+
+For local development, generate a trusted certificate using `mkcert`.
+
+### Generate local TLS certificates
+
+```bash
+# macOS
+brew install mkcert
+# Optional: only required if you use Firefox
+brew install nss
+# Install mkcert's local Certificate Authority
+mkcert -install
+# From the backend directory i.e `certify-service-backend/`
+mkdir -p certs
+mkcert \
+  -cert-file certs/cert.pem \
+  -key-file certs/key.pem \
+  localhost 127.0.0.1 ::1
+```
+
+This creates:
+
+```text
+certs/
+├── cert.pem
+└── key.pem
+```
+
+which are loaded by the application at startup.
+
+### TLS Client Notes
+
+If you generated the certificates with `mkcert`, browsers should trust the certificate automatically after running `mkcert -install`.
+
+If your client does not trust the certificate:
+
+
+
+* In Insomnia or Postman, disable certificate verification for local development requests.
+
+* In a browser, you may need to accept the certificate warning before proceeding to `https://localhost:9168`.
+
+**NB** This is only required for local development. In production, certificates should be issued by a trusted Certificate Authority.
 
 ## Quick Start
 
@@ -26,7 +74,7 @@ docker compose up --build
 3. Verify the service is running:
 
 ```bash
-curl http://localhost:9168/health-check
+curl i- http://localhost:9168/health-check
 ```
 
 Expected response:
@@ -35,7 +83,7 @@ Expected response:
 200 OK
 ```
 
-The service will be available at `http://localhost:9168`.
+The service will be available at `https://localhost:9168`.
 
 
 ## What it does
@@ -44,6 +92,7 @@ The service will be available at `http://localhost:9168`.
   issuer, expiration, and DNS Subject Alternative Names).
 - Persists each certificate to a PostgreSQL `certificates` table.
 - Returns the stored record, including a generated `id`, as JSON.
+- Lets you fetch all stored certificates.
 - Lets you fetch a stored certificate by its `id`.
 
 ## API
@@ -53,6 +102,7 @@ The service will be available at `http://localhost:9168`.
 | GET    | `/health-check`     | Liveness check                               | `200`   |
 | POST   | `/certificate`      | Parse a PEM certificate and store it         | `201`   |
 | GET    | `/certificate/{id}` | Fetch a stored certificate by its UUID `id`  | `200`   |
+| GET    | `/certificates`     | Fetch all stored certificates                | `200`   |
 
 ### `POST /certificate`
 
@@ -94,6 +144,10 @@ Errors are returned as `{ "error": "<message>" }` with these status codes:
 - `422 Unprocessable Entity` — the body isn't a valid PEM / X.509 certificate.
 - `400 Bad Request` — validation error.
 - `500 Internal Server Error` — database error.
+
+### `GET /certificates`
+
+Returns `200` with a list of all stored certificates.
 
 ## Tech stack
 
@@ -176,7 +230,7 @@ cargo run
 It will apply migrations and start listening on `0.0.0.0:9168`. Quick check:
 
 ```bash
-curl -i http://localhost:9168/health-check
+curl -i https://localhost:9168/health-check
 ```
 
 ## Tests
@@ -243,6 +297,7 @@ backend/
       health_check.rs             GET /health-check
       create_certificate.rs       POST /certificate
       fetch_certificate.rs        GET /certificate/{id}
+      fetch_all_certificates.rs   GET /certificates
     services/
       certificate_store.rs        SQLx queries (insert / get by id / get by serial)
     utils/
@@ -258,4 +313,5 @@ backend/
 - Only DNS SAN entries are stored.
 - When running tests, Certificates are not deduplicated. Uncomment out the duplicate check in `create_certificate.rs` to enable it.
 - The PEM payload itself is not persisted.
+- TLS self-signed certificates are used for HTTPS.
 - Authentication was intentionally omitted because it was outside the scope of the exercise.

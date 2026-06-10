@@ -1,6 +1,9 @@
 use certify_service_backend::{
-    Application, app_state::AppState, get_postgres_pool, services::CertificateStore,
-    utils::constants::DATABASE_URL,
+    Application,
+    app_state::AppState,
+    get_postgres_pool,
+    services::CertificateStore,
+    utils::constants::{DATABASE_URL, POSTGRES_PASSWORD},
 };
 use sqlx::{
     Connection, Executor, PgConnection, PgPool,
@@ -29,12 +32,15 @@ impl TestApp {
             .await
             .expect("Failed to build app");
 
-        let address = format!("http://{}", app.address.clone());
+        let address = format!("https://{}", app.address.clone());
 
         #[allow(clippy::let_underscore_future)]
         let _ = tokio::spawn(app.run());
 
-        let http_client = reqwest::Client::new();
+        let http_client = reqwest::Client::builder()
+            .danger_accept_invalid_certs(true)
+            .build()
+            .expect("Failed to build http client");
 
         Self {
             address,
@@ -81,18 +87,6 @@ impl TestApp {
 
         self.clean_up_called = true;
     }
-
-    // pub async fn post_signup<Body>(&self, body: &Body) -> reqwest::Response
-    // where
-    //     Body: serde::Serialize,
-    // {
-    //     self.http_client
-    //         .post(&format!("{}/signup", &self.address))
-    //         .json(body)
-    //         .send()
-    //         .await
-    //         .expect("Failed to execute request.")
-    // }
 }
 
 impl Drop for TestApp {
@@ -140,7 +134,11 @@ async fn delete_database(db_name: &str) {
 }
 
 async fn configure_postgresql(db_name: &str) -> PgPool {
-    let postgresql_conn_url = "postgres://pos:[your-password]@localhost:5432".to_owned();
+    let postgresql_conn_url = format!(
+        "postgres://pos:{}@localhost:5432",
+        POSTGRES_PASSWORD.to_owned()
+    )
+    .to_owned();
 
     configure_database(&postgresql_conn_url, db_name).await;
 

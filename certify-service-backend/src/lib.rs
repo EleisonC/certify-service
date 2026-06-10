@@ -45,6 +45,9 @@ impl Application {
 
         let listener = TcpListener::bind(address)?;
         let address = listener.local_addr()?.to_string();
+        listener
+            .set_nonblocking(true)
+            .expect("Failed to set non-blocking mode");
 
         Ok(Application {
             router,
