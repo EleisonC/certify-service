@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO certificates\n                (serial_number, subject, issuer, not_after, san_entries)\n            VALUES ($1, $2, $3, $4, $5)\n            RETURNING\n                id as \"id!\",\n                serial_number,\n                subject as \"subject!\",\n                issuer as \"issuer!\",\n                not_after as \"not_after!\",\n                san_entries as \"san_entries!\",\n                created_at as \"created_at!\"\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "serial_number",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "subject!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "issuer!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "not_after!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "san_entries!",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at!",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Timestamptz",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "083ed84c34662582a022bddc8e83454075e4ef168bcf8b2e7cc12ed47606900c"
+}

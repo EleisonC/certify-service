@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                id as \"id!\",\n                serial_number,\n                subject as \"subject!\",\n                issuer as \"issuer!\",\n                not_after as \"not_after!\",\n                san_entries as \"san_entries!\",\n                created_at as \"created_at!\"\n            FROM certificates\n            WHERE id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "serial_number",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "subject!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "issuer!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "not_after!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "san_entries!",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at!",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "81d8800996249175c32ab41203a3de311a9891b5ddac6859648b264deee2082e"
+}

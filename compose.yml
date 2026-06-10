@@ -1,0 +1,41 @@
+services:
+  certify-service-backend:
+    build:
+      context: ./certify-service-backend
+      dockerfile: Dockerfile
+    container_name: certify-service-backend
+    environment:
+      DATABASE_URL: "postgres://pos:${POSTGRES_PASSWORD}@db:5432/pos?sslmode=disable"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9168/health-check"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    ports:
+      - "9168:9168"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    container_name: certify-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: pos
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: pos
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pos -d pos"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  db:
