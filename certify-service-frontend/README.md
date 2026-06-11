@@ -12,35 +12,29 @@ cp .env.example .env.local   # adjust NEXT_PUBLIC_API_URL if needed
 npm run dev                  # http://localhost:3000 (redirects to /inventory)
 ```
 
-The backend is expected at `http://localhost:9168` by default
-(`docker compose up --build` in the repo root). While the backend has no list
-endpoint yet, a faithful mock is included:
+The backend is expected at `https://localhost:9168` by default
+(refer to `README.md` for details).
 
-```bash
-node scripts/mock-api.mjs    # serves the API shape on :9168
-```
+## Run with Docker
 
-## Backend endpoint assumptions
+From the repo root, `docker compose up --build` starts the database, backend,
+and this frontend (http://localhost:3000).
 
-`certify-service-backend` currently exposes `POST /certificate`,
-`GET /certificate/{id}`, and `GET /health-check` — but **no list endpoint**.
-This UI assumes:
+The image is a multi-stage build (`Dockerfile`) producing Next.js standalone
+output (`output: "standalone"` in `next.config.mjs`), run as a non-root user.
+Two API URLs are involved because SSR and the browser sit on different
+networks:
 
-* **`GET /certificates`** returns a JSON array of certificate records in the
-  same shape as `GET /certificate/{id}`:
-  `{ id, serial_number, subject, issuer, expiration, san_entries, created_at }`
+* `NEXT_PUBLIC_API_URL` (build arg, baked into the browser bundle) —
+  `https://localhost:9168`, the host-published backend port.
+* `API_URL` (runtime env, server-only) —
+  `https://certify-service-backend:9168`, the compose-internal hostname used
+  by the SSR prefetch.
 
-Notes on the real shape:
-
-* The backend serializes its `not_after` column as **`expiration`**
-  (`#[serde(rename = "expiration")]` in `domain/certificate.rs`).
-* There is **no `not_before`** field, so the UI shows expiry-based validity
-  only.
-
-The list assumption is isolated in `lib/api/certificates.js`
-(`fetchCertificates`); if the endpoint ships under a different path (e.g. the
-singular `GET /certificate`) or adds pagination, only that function changes.
-The mock serves the list on both `/certificates` and `/certificate`.
+The backend's mkcert certificate only names `localhost`/`127.0.0.1`, so the
+frontend container sets `NODE_TLS_REJECT_UNAUTHORIZED=0` for its server-side
+fetches (dev-only; a production deployment would use a certificate covering
+the internal hostname instead).
 
 ## Architecture
 

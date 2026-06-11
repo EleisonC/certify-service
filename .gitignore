@@ -3,3 +3,4 @@ certify-service-backend/.env
 certify-service-backend/target/
 .DS_Store
 certify-service-backend/certs/
+.env

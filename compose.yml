@@ -9,7 +9,7 @@ services:
     volumes:
           - ./certify-service-backend/certs:/app/certs:ro
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1","--no-check-certificate","--spider", "https://localhost:9168/health-check"]
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/9168"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -19,6 +19,30 @@ services:
       - "9168:9168"
     depends_on:
       db:
+        condition: service_healthy
+
+  certify-service-frontend:
+    build:
+      context: ./certify-service-frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: "https://localhost:9168"
+    container_name: certify-service-frontend
+    environment:
+      # SSR talks to the backend over the compose network at runtime.
+      API_URL: "https://certify-service-backend:9168"
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/inventory"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      certify-service-backend:
         condition: service_healthy
 
   db:

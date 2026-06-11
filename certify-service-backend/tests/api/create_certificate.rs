@@ -60,7 +60,6 @@ async fn should_return_201_created_with_parsed_certificate() {
         .create_new_certificate(&serde_json::json!({ "pem_data": VALID_CERT_PEM }))
         .await;
 
-    println!("{:?}", response);
     assert_eq!(response.status().as_u16(), 201);
     let body: serde_json::Value = response.json().await.unwrap();
 

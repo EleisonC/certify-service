@@ -58,7 +58,7 @@ impl Application {
     }
 
     pub async fn run(self) -> Result<(), std::io::Error> {
-        println!("listening on {}", &self.address);
+        tracing::info!("listening on {}", &self.address);
         axum_server::from_tcp_rustls(self.listener, self.tls_config)
             .expect("Failed to create TLS server")
             .serve(self.router.into_make_service())

@@ -1,6 +1,9 @@
 use certify_service_backend::{
-    Application, app_state::AppState, get_postgres_pool, services::CertificateStore,
-    utils::constants::DATABASE_URL,
+    Application,
+    app_state::AppState,
+    get_postgres_pool,
+    services::CertificateStore,
+    utils::{constants::DATABASE_URL, tracing::init_tracing},
 };
 use sqlx::PgPool;
 use std::sync::Arc;
@@ -8,6 +11,7 @@ use tokio::sync::RwLock;
 
 #[tokio::main]
 async fn main() {
+    init_tracing().expect("Failed to initialize tracing");
     let pg_pool = configure_postgresql().await;
 
     let certificate_store = Arc::new(RwLock::new(CertificateStore::new(pg_pool)));
