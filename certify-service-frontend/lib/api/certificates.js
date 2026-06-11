@@ -10,19 +10,8 @@ export const certificateKeys = {
 };
 
 /**
- * Fetch the full certificate inventory.
- *
- * ASSUMPTION: certify-service-backend currently exposes POST /certificate and
- * GET /certificate/{id} but no list endpoint. We assume `GET /certificates`
- * (plural, the usual REST collection form) returns a JSON array of records in
- * the same shape as `GET /certificate/{id}`:
- *
- *   [{ id, serial_number, subject, issuer, expiration, san_entries,
- *      created_at }, ...]
- *
- * Note: the backend serializes its `not_after` column as `expiration`.
- * If the list endpoint ships under a different path (e.g. the singular
- * `GET /certificate`) only this function needs to change.
+ * Fetch the full certificate inventory — `GET /certificates`.
+ * Returns a JSON array of records in the same shape as `GET /certificate/{id}`:
  */
 export async function fetchCertificates() {
   const { data } = await apiClient.get("/certificates");

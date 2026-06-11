@@ -15,6 +15,27 @@ npm run dev                  # http://localhost:3000 (redirects to /inventory)
 The backend is expected at `https://localhost:9168` by default
 (refer to `README.md` for details).
 
+## Run with Docker
+
+From the repo root, `docker compose up --build` starts the database, backend,
+and this frontend (http://localhost:3000).
+
+The image is a multi-stage build (`Dockerfile`) producing Next.js standalone
+output (`output: "standalone"` in `next.config.mjs`), run as a non-root user.
+Two API URLs are involved because SSR and the browser sit on different
+networks:
+
+* `NEXT_PUBLIC_API_URL` (build arg, baked into the browser bundle) —
+  `https://localhost:9168`, the host-published backend port.
+* `API_URL` (runtime env, server-only) —
+  `https://certify-service-backend:9168`, the compose-internal hostname used
+  by the SSR prefetch.
+
+The backend's mkcert certificate only names `localhost`/`127.0.0.1`, so the
+frontend container sets `NODE_TLS_REJECT_UNAUTHORIZED=0` for its server-side
+fetches (dev-only; a production deployment would use a certificate covering
+the internal hostname instead).
+
 ## Architecture
 
 ```

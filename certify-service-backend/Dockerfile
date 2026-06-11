@@ -20,8 +20,18 @@ ENV SQLX_OFFLINE=true
 RUN cargo build --release --bin certify-service-backend
 
 # We do not need the Rust toolchain to run the binary!
-# Start with a minimal image and copy over the binary and assets folder.
+# Start with a minimal image and copy over the binary and assets folder. non-root
 FROM debian:buster-slim AS runtime
 WORKDIR /app
+ARG UID=10001
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/usr/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    appuser
 COPY --from=builder /app/target/release/certify-service-backend /usr/local/bin
+USER appuser
 ENTRYPOINT ["/usr/local/bin/certify-service-backend"]
