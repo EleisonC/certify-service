@@ -21,7 +21,7 @@ RUN cargo build --release --bin certify-service-backend
 
 # We do not need the Rust toolchain to run the binary!
 # Start with a minimal image and copy over the binary and assets folder. non-root
-FROM debian:buster-slim AS runtime
+FROM debian:bookworm-slim AS runtime
 WORKDIR /app
 ARG UID=10001
 RUN adduser \
